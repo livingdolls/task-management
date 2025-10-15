@@ -1,0 +1,13 @@
+database:
+  driver: "mysql"
+  host: "127.0.0.1"
+  port: "3306"
+  user: "yur"
+  password: "hir"
+  name: "mydb"
+  max_open_cons: 10
+  max_idle_cons: 5
+  max_life_time: 5
+
+server:
+  port: 3000
