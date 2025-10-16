@@ -7,19 +7,51 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"task-management/internal/applications/services"
 	"task-management/internal/config"
+	"task-management/internal/infra/adapter/http/handler"
+	"task-management/internal/infra/adapter/http/router"
+	"task-management/internal/infra/adapter/storages"
 	"task-management/internal/infra/logger"
+	"task-management/internal/infra/security"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 )
 
-func StartServer() *http.Server {
+type AppServer struct {
+	DB     *gorm.DB
+	Config *config.AppConfig
+	Gin    *gin.Engine
+}
+
+func InitServer(cf *config.AppConfig, db *gorm.DB) *AppServer {
+	engine := gin.Default()
+
+	userRepo := storages.NewUserRepository(db)
+	jwtService := security.NewJWTAdapter(cf.Secret, time.Hour)
+	authService := services.NewAuthService(userRepo, jwtService)
+	authHandler := handler.NewAuthHandler(authService)
+
+	// Setup router
+	router.SetupRoutes(engine, authHandler, jwtService)
+
+	return &AppServer{
+		DB:     db,
+		Config: cf,
+		Gin:    engine,
+	}
+}
+
+func StartServer(app *AppServer) *http.Server {
 	port := config.Config.Server.Port
 	addr := fmt.Sprintf(":%v", port)
 
 	server := &http.Server{
-		Addr: addr,
+		Addr:    addr,
+		Handler: app.Gin,
 	}
 
 	logger.Info("Starting server", zap.String("address", addr))

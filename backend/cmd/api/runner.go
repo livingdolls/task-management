@@ -25,6 +25,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	// load jwt secret
+	jwtSecret := config.Config.Secret
+	if jwtSecret == "" {
+		println("JWT secret is not set in the configuration")
+		os.Exit(1)
+	}
+
 	// init database
 	database, err := db.NewDatabase(config.Config.Database)
 
@@ -33,7 +40,10 @@ func main() {
 	}
 	defer database.Close()
 
-	app := server.StartServer()
+	// init app server
+	initApp := server.InitServer(&config.Config, database.DB)
+
+	app := server.StartServer(initApp)
 	server.WaitForShutdown(app, func() {
 		_ = database.Close()
 	})

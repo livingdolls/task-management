@@ -23,6 +23,7 @@ type ServerConfig struct {
 type AppConfig struct {
 	Database DatabaseConfig
 	Server   ServerConfig
+	Secret   string
 }
 
 var Config AppConfig
