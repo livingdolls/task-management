@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useCreateTaskStore } from "../store/useUiStore";
+import type { TTaskStatus } from "../types/task";
 
 interface CreateTaskModalProps {
   onSubmit: (task: {
@@ -16,9 +17,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
   const { createModal, setCreateModal } = useCreateTaskStore();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<"To Do" | "In Progress" | "Done">(
-    "To Do"
-  );
+  const [status, setStatus] = useState<TTaskStatus>("To Do");
   const [deadline, setDeadline] = useState<Date | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -71,7 +70,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter task title"
               required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
           <div className="mb-4">
@@ -87,7 +86,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter task description"
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2 border  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             />
           </div>
           <div className="mb-6">
@@ -100,10 +99,8 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             <select
               id="status"
               value={status}
-              onChange={(e) =>
-                setStatus(e.target.value as "To Do" | "In Progress" | "Done")
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => setStatus(e.target.value as TTaskStatus)}
+              className="w-full px-3 py-2 border  rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="To Do">To Do</option>
               <option value="In Progress">In Progress</option>
@@ -127,7 +124,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({
             <button
               type="button"
               onClick={() => setCreateModal(false)}
-              className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
+              className="px-4 py-2 text-gray-600 border  rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300"
             >
               Cancel
             </button>

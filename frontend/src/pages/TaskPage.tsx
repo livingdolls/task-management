@@ -9,8 +9,9 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useState } from "react";
 import { useCreateTaskStore, useUiStore } from "../store/useUiStore";
 import { UpdateTaskModal, type TaskUdate } from "../components/UpdateTaskModal";
-import { type TTask } from "../types/task";
+import { type TTask, type TTaskStatus } from "../types/task";
 import { CreateTaskModal } from "../components/CreateTaskModal";
+import { CirclePlus } from "lucide-react";
 
 export type TaskFilter = {
   status?: string;
@@ -98,7 +99,7 @@ export const TaskPage = () => {
   }: {
     title: string;
     description: string;
-    status: "To Do" | "In Progress" | "Done";
+    status: TTaskStatus;
     deadline?: Date | null;
   }) => {
     createTask.mutate({ title, description, status, deadline });
@@ -118,14 +119,17 @@ export const TaskPage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{user?.name} Tasks</h1>
+      <div className="flex flex-row gap-4 mb-4 items-center">
+        <h1 className="text-2xl font-bold ">{user?.name} Tasks</h1>
 
-      <button
-        onClick={handleOpenCreateModal}
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Add Task
-      </button>
+        <button
+          onClick={handleOpenCreateModal}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex flex-row gap-4 items-center"
+        >
+          Add Task
+          <CirclePlus />
+        </button>
+      </div>
       <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label
@@ -174,68 +178,71 @@ export const TaskPage = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Title
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Deadline
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {(data?.data || []).map((task: any) => (
-              <tr key={task.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {(data?.data || []).map((task: any, index: number) => {
+          const colors = [
+            "bg-red-100 border-red-200",
+            "bg-blue-100 border-blue-200",
+            "bg-green-100 border-green-200",
+            "bg-yellow-100 border-yellow-200",
+            "bg-purple-100 border-purple-200",
+            "bg-pink-100 border-pink-200",
+            "bg-indigo-100 border-indigo-200",
+            "bg-orange-100 border-orange-200",
+          ];
+          const cardColor = colors[index % colors.length];
+
+          return (
+            <div
+              key={task.id}
+              className={`${cardColor} border rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow`}
+            >
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   {task.title}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                </h3>
+                <p className="text-gray-600 text-sm mb-3">{task.description}</p>
+
+                <div className="flex items-center justify-between mb-4">
                   <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    className={`px-3 py-1 text-xs font-semibold rounded-full ${
                       task.status === "Done"
-                        ? "bg-green-100 text-green-800"
+                        ? "bg-green-500 text-white"
                         : task.status === "In Progress"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-gray-100 text-gray-800"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-500 text-white"
                     }`}
                   >
                     {task.status}
                   </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {task.deadline
-                    ? isNaN(Date.parse(task.deadline))
-                      ? ""
-                      : new Date(task.deadline).toLocaleDateString()
-                    : ""}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => handleSetTask(task)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-2"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteTask(task.id)}
-                    className="text-red-600 hover:text-red-900"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+                  <span className="text-sm text-gray-700">
+                    {task.deadline
+                      ? isNaN(Date.parse(task.deadline))
+                        ? ""
+                        : new Date(task.deadline).toLocaleDateString()
+                      : "No deadline"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => handleSetTask(task)}
+                  className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteTask(task.id)}
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Modal */}

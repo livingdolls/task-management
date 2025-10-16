@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useUiStore } from "../store/useUiStore";
+import type { TTaskStatus } from "../types/task";
 
 export type TaskUdate = {
   id: number;
   title: string;
   description: string;
-  status: "To Do" | "In Progress" | "Done";
+  status: TTaskStatus;
   deadline?: Date | null | undefined;
 };
 
@@ -49,7 +50,7 @@ export const UpdateTaskModal: React.FC<UpdateTaskModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Update Task</h2>
           <button
