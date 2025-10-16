@@ -28,6 +28,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   fetchUser: async () => {
+    set((state) => {
+      if (state.loading) return state;
+      return { loading: true };
+    });
+
     try {
       const res = await axiosClient.get<TApiResponse<User>>("/profile");
       set({ user: res.data.data, loading: false });

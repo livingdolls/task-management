@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { useMutation } from "@tanstack/react-query";
@@ -10,17 +10,19 @@ export const LoginPage = () => {
   const setToken = useAuthStore((s) => s.setToken);
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
+  const token = useAuthStore((state) => state.token);
+
+  useEffect(() => {
+    if (token) {
+      navigate("/tasks");
+    }
+  }, [token]);
 
   const loginMutation = useMutation({
     mutationFn: LoginRepository,
     onSuccess: (res) => {
-      if (!res.success || !res.data) {
-        setError("Login failed");
-        return;
-      }
-
+      if (!res.success || !res.data) return setError("Login failed");
       setToken(res.data.token);
-      navigate("/tasks");
     },
     onError: (err: any) => {
       setError(err.response?.data?.message || "Login failed");
