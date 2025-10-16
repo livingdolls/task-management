@@ -1,6 +1,6 @@
 import type { TaskUdate } from "../components/UpdateTaskModal";
+import type { TaskFilter } from "../hooks/useTasks";
 import axiosClient from "../lib/axios";
-import type { TaskFilter } from "../pages/TaskPage";
 import type { TApiResponse } from "../types/api";
 import type { TTask } from "../types/task";
 

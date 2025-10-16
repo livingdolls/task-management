@@ -3,16 +3,13 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useCreateTaskStore, useUiStore } from "../store/useUiStore";
 import { UpdateTaskModal, type TaskUdate } from "../components/UpdateTaskModal";
 import { CreateTaskModal } from "../components/CreateTaskModal";
-import { TaskFilters } from "../components/TaskFilters";
+import { TaskFiltersComponent } from "../components/TaskFilters";
 import { TaskList } from "../components/TaskList";
 import { PageHeader } from "../components/PageHeader";
 import { ErrorDisplay } from "../components/ErrorDisplay";
 import { LoadingSpinner } from "../components/LoadingSpinner";
-import {
-  useTasks,
-  type TaskFilter,
-  type CreateTaskData,
-} from "../hooks/useTasks";
+import type { TaskFilter, CreateTaskData } from "../hooks/useTasks";
+import { useTasks } from "../hooks/useTasks";
 import { notifications } from "../utils/notifications";
 import type { TTask } from "../types/task";
 
@@ -126,7 +123,7 @@ export const TaskPage = () => {
     <div className="container mx-auto p-4">
       <PageHeader userName={user?.name} onCreateTask={handleOpenCreateModal} />
 
-      <TaskFilters filters={filters} onFiltersChange={handleFiltersChange} />
+      <TaskFiltersComponent filters={filters} onFiltersChange={handleFiltersChange} />
 
       <TaskList
         tasks={tasks}

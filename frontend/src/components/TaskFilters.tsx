@@ -6,7 +6,7 @@ interface TaskFiltersProps {
   onFiltersChange: (filters: TaskFilter) => void;
 }
 
-export const TaskFilters = ({ filters, onFiltersChange }: TaskFiltersProps) => {
+export const TaskFiltersComponent = ({ filters, onFiltersChange }: TaskFiltersProps) => {
   const handleStatusChange = (status: string) => {
     onFiltersChange({
       ...filters,
