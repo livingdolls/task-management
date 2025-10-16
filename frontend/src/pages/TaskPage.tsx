@@ -1,13 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  CreateTaskRepository,
+  DeleteTaskRepository,
   TaskRepository,
   UpdateTaskRepository,
 } from "../repository/task_repository";
 import { useAuthStore } from "../store/useAuthStore";
 import { useState } from "react";
-import { useUiStore } from "../store/useUiStore";
+import { useCreateTaskStore, useUiStore } from "../store/useUiStore";
 import { UpdateTaskModal, type TaskUdate } from "../components/UpdateTaskModal";
 import { type TTask } from "../types/task";
+import { CreateTaskModal } from "../components/CreateTaskModal";
 
 export type TaskFilter = {
   status?: string;
@@ -17,7 +20,8 @@ export type TaskFilter = {
 export const TaskPage = () => {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<TaskFilter>({});
-  const { updateModal, setUpdateModal } = useUiStore();
+  const { setUpdateModal } = useUiStore();
+  const { setCreateModal } = useCreateTaskStore();
   const [task, setTask] = useState<
     Pick<TTask, "title" | "id" | "description" | "status" | "deadline">
   >({
@@ -47,6 +51,17 @@ export const TaskPage = () => {
     },
   });
 
+  const createTask = useMutation({
+    mutationFn: CreateTaskRepository,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      alert("Task created successfully");
+    },
+    onError: (error) => {
+      alert((error as Error).message || "Failed to create task");
+    },
+  });
+
   const handleUpdate = (updatedTask: TaskUdate) => {
     updateTask.mutate(updatedTask);
   };
@@ -64,6 +79,40 @@ export const TaskPage = () => {
     setUpdateModal(true);
   };
 
+  const deleteTask = useMutation({
+    mutationFn: DeleteTaskRepository,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      alert("Task deleted successfully");
+    },
+    onError: (error) => {
+      alert((error as Error).message || "Failed to delete task");
+    },
+  });
+
+  const handleCreateTask = ({
+    title,
+    description,
+    status,
+    deadline,
+  }: {
+    title: string;
+    description: string;
+    status: "To Do" | "In Progress" | "Done";
+    deadline?: Date | null;
+  }) => {
+    createTask.mutate({ title, description, status, deadline });
+    setCreateModal(false);
+  };
+
+  const handleDeleteTask = (id: number) => {
+    deleteTask.mutate(id);
+  };
+
+  const handleOpenCreateModal = () => {
+    setCreateModal(true);
+  };
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {(error as Error).message}</div>;
 
@@ -71,6 +120,12 @@ export const TaskPage = () => {
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{user?.name} Tasks</h1>
 
+      <button
+        onClick={handleOpenCreateModal}
+        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Add Task
+      </button>
       <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label
@@ -170,7 +225,10 @@ export const TaskPage = () => {
                   >
                     Edit
                   </button>
-                  <button className="text-red-600 hover:text-red-900">
+                  <button
+                    onClick={() => handleDeleteTask(task.id)}
+                    className="text-red-600 hover:text-red-900"
+                  >
                     Delete
                   </button>
                 </td>
@@ -181,11 +239,10 @@ export const TaskPage = () => {
       </div>
 
       {/* Modal */}
-      {updateModal && (
-        <div className="fixed inset-0 bg-white/30 overflow-y-auto h-full w-full z-50">
-          <UpdateTaskModal task={task} onUpdate={handleUpdate} />
-        </div>
-      )}
+      <UpdateTaskModal task={task} onUpdate={handleUpdate} />
+
+      {/* Modal Create */}
+      <CreateTaskModal onSubmit={handleCreateTask} />
     </div>
   );
 };

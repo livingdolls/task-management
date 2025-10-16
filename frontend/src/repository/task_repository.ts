@@ -49,3 +49,15 @@ export const DeleteTaskRepository = async (id: number) => {
 
   return res.data;
 };
+
+export const CreateTaskRepository = async (
+  data: Omit<TaskUdate, "id">
+): Promise<TApiResponse<TTask>> => {
+  const res = await axiosClient.post("/tasks/", data);
+
+  if (res.status !== 200 && res.status !== 201) {
+    throw new Error(res.data?.errors || "Failed to create task");
+  }
+
+  return res.data;
+};
