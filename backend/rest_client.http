@@ -1,0 +1,77 @@
+### Create Task User 1
+POST http://192.168.88.178:3010/api/v1/tasks
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6Inl1cmluYWhpcmF0ZSIsImlzcyI6InRhc2stbWFuYWdlbWVudC1zZXJ2aWNlcyIsInN1YiI6InVzZXItYXV0aGVudGljYXRpb24iLCJleHAiOjE3NjA1OTI5NTgsImlhdCI6MTc2MDU4OTM1OH0.wkdVSa1A-PovaIzbVCLzHDP5s5PUzH6UJNtnSErQZFo
+
+{
+    "title": "New Task",
+    "description": "This is a new task",
+    "status": "To Do",
+    "deadline": "2024-12-31T23:59:59Z"
+}
+
+### Create Task User 2
+POST http://192.168.88.178:3010/api/v1/tasks
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6Inl1cmluYWhoamlyYXRlIiwiaXNzIjoidGFzay1tYW5hZ2VtZW50LXNlcnZpY2VzIiwic3ViIjoidXNlci1hdXRoZW50aWNhdGlvbiIsImV4cCI6MTc2MDU5Mjg5MywiaWF0IjoxNzYwNTg5MjkzfQ.KLFkZkrf9PG0k8CyhvxLuN0E23PVR9nhhtecPwK4Ae0
+
+{
+    "title": "New Task For User 2",
+    "description": "This is a new task user 2",
+    "status": "To Do",
+    "deadline": "2024-12-31T23:59:59Z"
+}
+
+### Get Tasks User 1
+GET http://192.168.88.178:3010/api/v1/tasks
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6Inl1cmluYWhpcmF0ZSIsImlzcyI6InRhc2stbWFuYWdlbWVudC1zZXJ2aWNlcyIsInN1YiI6InVzZXItYXV0aGVudGljYXRpb24iLCJleHAiOjE3NjA1OTI5NTgsImlhdCI6MTc2MDU4OTM1OH0.wkdVSa1A-PovaIzbVCLzHDP5s5PUzH6UJNtnSErQZFo
+
+### Get Tasks User 2
+GET http://192.168.88.178:3010/api/v1/tasks
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6Inl1cmluYWhoamlyYXRlIiwiaXNzIjoidGFzay1tYW5hZ2VtZW50LXNlcnZpY2VzIiwic3ViIjoidXNlci1hdXRoZW50aWNhdGlvbiIsImV4cCI6MTc2MDU5Mjg5MywiaWF0IjoxNzYwNTg5MjkzfQ.KLFkZkrf9PG0k8CyhvxLuN0E23PVR9nhhtecPwK4Ae0
+
+### Update Task User 1
+PUT http://192.168.88.178:3010/api/v1/tasks/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6Inl1cmluYWhpcmF0ZSIsImlzcyI6InRhc2stbWFuYWdlbWVudC1zZXJ2aWNlcyIsInN1YiI6InVzZXItYXV0aGVudGljYXRpb24iLCJleHAiOjE3NjA1OTI5NTgsImlhdCI6MTc2MDU4OTM1OH0.wkdVSa1A-PovaIzbVCLzHDP5s5PUzH6UJNtnSErQZFo
+
+{
+    "title": "Updated Task Title",
+    "description": "Updated description",
+    "status": "In Progress",
+    "deadline": "2024-11-30T23:59:59Z"
+}
+
+### Update Task User 2
+PUT http://192.168.88.178:3010/api/v1/tasks/4
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6Inl1cmluYWhoamlyYXRlIiwiaXNzIjoidGFzay1tYW5hZ2VtZW50LXNlcnZpY2VzIiwic3ViIjoidXNlci1hdXRoZW50aWNhdGlvbiIsImV4cCI6MTc2MDU5Mjg5MywiaWF0IjoxNzYwNTg5MjkzfQ.KLFkZkrf9PG0k8CyhvxLuN0E23PVR9nhhtecPwK4Ae0
+
+{
+    "title": "Updated Task Title User 2",
+    "description": "Updated description",
+    "status": "In Progress",
+    "deadline": "2024-11-30T23:59:59Z"
+}
+
+### Get Tasks User 1
+GET http://192.168.88.178:3010/api/v1/tasks/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6Inl1cmluYWhpcmF0ZSIsImlzcyI6InRhc2stbWFuYWdlbWVudC1zZXJ2aWNlcyIsInN1YiI6InVzZXItYXV0aGVudGljYXRpb24iLCJleHAiOjE3NjA1OTI5NTgsImlhdCI6MTc2MDU4OTM1OH0.wkdVSa1A-PovaIzbVCLzHDP5s5PUzH6UJNtnSErQZFo
+
+### Get Tasks User 2
+GET http://192.168.88.178:3010/api/v1/tasks/6
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6Inl1cmluYWhoamlyYXRlIiwiaXNzIjoidGFzay1tYW5hZ2VtZW50LXNlcnZpY2VzIiwic3ViIjoidXNlci1hdXRoZW50aWNhdGlvbiIsImV4cCI6MTc2MDU5Mjg5MywiaWF0IjoxNzYwNTg5MjkzfQ.KLFkZkrf9PG0k8CyhvxLuN0E23PVR9nhhtecPwK4Ae0
+
+### Delete Task User 1
+DELETE http://192.168.88.178:3010/api/v1/tasks/99
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6Inl1cmluYWhpcmF0ZSIsImlzcyI6InRhc2stbWFuYWdlbWVudC1zZXJ2aWNlcyIsInN1YiI6InVzZXItYXV0aGVudGljYXRpb24iLCJleHAiOjE3NjA1OTI5NTgsImlhdCI6MTc2MDU4OTM1OH0.wkdVSa1A-PovaIzbVCLzHDP5s5PUzH6UJNtnSErQZFo
+
+### Delete Task User 2
+DELETE http://192.168.88.178:3010/api/v1/tasks/5
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6Inl1cmluYWhoamlyYXRlIiwiaXNzIjoidGFzay1tYW5hZ2VtZW50LXNlcnZpY2VzIiwic3ViIjoidXNlci1hdXRoZW50aWNhdGlvbiIsImV4cCI6MTc2MDU5Mjg5MywiaWF0IjoxNzYwNTg5MjkzfQ.KLFkZkrf9PG0k8CyhvxLuN0E23PVR9nhhtecPwK4Ae0

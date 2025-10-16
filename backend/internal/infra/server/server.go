@@ -34,9 +34,12 @@ func InitServer(cf *config.AppConfig, db *gorm.DB) *AppServer {
 	jwtService := security.NewJWTAdapter(cf.Secret, time.Hour)
 	authService := services.NewAuthService(userRepo, jwtService)
 	authHandler := handler.NewAuthHandler(authService)
+	taskRepo := storages.NewTaskRepository(db)
+	taskService := services.NewTaskService(taskRepo)
+	taskHandler := handler.NewTaskHandler(taskService)
 
 	// Setup router
-	router.SetupRoutes(engine, authHandler, jwtService)
+	router.SetupRoutes(engine, authHandler, taskHandler, jwtService)
 
 	return &AppServer{
 		DB:     db,

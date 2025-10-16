@@ -8,19 +8,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, jwtSvc services.JWTService) {
+func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, taskHandler *handler.TaskHandler, jwtSvc services.JWTService) {
 	api := r.Group("/api/v1")
 
-	auth := api.Group("/auth")
+	// --- Auth Routes ---
+	authGroup := api.Group("/auth")
 	{
-		auth.POST("/register", authHandler.Register)
-		auth.POST("/login", authHandler.Login)
+		authGroup.POST("/register", authHandler.Register)
+		authGroup.POST("/login", authHandler.Login)
 	}
 
-	// Protected routes
-	protected := api.Group("/")
-	protected.Use(middleware.JWTMiddleware(jwtSvc))
+	// --- Protected Routes ---
+	protectedGroup := api.Group("/")
+	protectedGroup.Use(middleware.JWTMiddleware(jwtSvc))
 	{
-		protected.GET("/profile", authHandler.Me)
+		// User profile
+		protectedGroup.GET("/profile", authHandler.Me)
+
+		// Task routes
+		taskGroup := protectedGroup.Group("/tasks")
+		{
+			taskGroup.POST("/", taskHandler.Create)
+			taskGroup.GET("/", taskHandler.Get)
+			taskGroup.GET("/:id", taskHandler.GetByID)
+			taskGroup.PUT("/:id", taskHandler.Update)
+			taskGroup.DELETE("/:id", taskHandler.Delete)
+		}
 	}
 }

@@ -10,4 +10,5 @@ type TaskService interface {
 	GetTasks(userId uint, status *domain.TaskStatus, deadline *time.Time) ([]domain.Task, error)
 	UpdateTask(arg *domain.Task, userId uint) error
 	DeleteTask(taskId uint, userId uint) error
+	GetTaskById(taskId uint, userId uint) (*domain.Task, error)
 }
