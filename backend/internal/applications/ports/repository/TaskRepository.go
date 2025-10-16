@@ -7,8 +7,8 @@ import (
 
 type TaskRepository interface {
 	Create(task *domain.Task) error
-	GetByID(id string) (*domain.Task, error)
-	GetByUser(userID int, status *domain.TaskStatus, deadline *time.Time) ([]domain.Task, error)
+	GetByID(id uint) (*domain.Task, error)
+	GetByUser(userID uint, status *domain.TaskStatus, deadline *time.Time) ([]domain.Task, error)
 	Update(task *domain.Task) error
-	Delete(id string) error
+	Delete(id uint) error
 }

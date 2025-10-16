@@ -1,6 +1,7 @@
 package security
 
 import (
+	"errors"
 	"task-management/internal/applications/ports/services"
 	"task-management/internal/domain"
 	"time"
@@ -49,21 +50,26 @@ func (j *JWTAdapter) GenerateToken(user *domain.User) (string, error) {
 }
 
 // ValidateToken implements services.JWTService.
-func (j *JWTAdapter) ValidateToken(token string) (*domain.User, error) {
-	parsedToken, err := jwt.ParseWithClaims(token, &JWTClaims{}, func(t *jwt.Token) (interface{}, error) {
+func (j *JWTAdapter) ValidateToken(token string) (*domain.JWTClaims, error) {
+	t, err := jwt.ParseWithClaims(token, &domain.JWTClaims{}, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrTokenMalformed
+		}
 		return []byte(j.secret), nil
 	})
+
 	if err != nil {
-		return nil, err
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, errors.New("token expired")
+		}
+		return nil, errors.New("invalid token")
 	}
 
-	claims, ok := parsedToken.Claims.(*JWTClaims)
-	if !ok || !parsedToken.Valid {
-		return nil, jwt.ErrTokenInvalidClaims
+	claims, ok := t.Claims.(*domain.JWTClaims)
+
+	if !ok || !t.Valid {
+		return nil, errors.New("invalid token claims")
 	}
 
-	return &domain.User{
-		ID:       claims.UserID,
-		Username: claims.Username,
-	}, nil
+	return claims, nil
 }

@@ -3,6 +3,7 @@ package router
 import (
 	"task-management/internal/applications/ports/services"
 	"task-management/internal/infra/adapter/http/handler"
+	"task-management/internal/infra/adapter/http/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,9 +18,9 @@ func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, jwtSvc service
 	}
 
 	// Protected routes
-	// protected := api.Group("/")
-	// protected.Use(middleware.JWTAuthMiddleware(jwtSvc))
-	// {
-	// 	protected.GET("/profile", profileHandler.GetProfile)
-	// }
+	protected := api.Group("/")
+	protected.Use(middleware.JWTMiddleware(jwtSvc))
+	{
+		protected.GET("/profile", authHandler.Me)
+	}
 }

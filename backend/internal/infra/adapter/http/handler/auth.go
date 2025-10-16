@@ -5,6 +5,7 @@ import (
 	"task-management/internal/applications/dto/request"
 	"task-management/internal/applications/dto/response"
 	"task-management/internal/applications/ports/services"
+	"task-management/internal/infra/adapter/http/middleware"
 	"task-management/internal/infra/logger"
 
 	"github.com/gin-gonic/gin"
@@ -97,6 +98,40 @@ func (h *AuthHandler) Login(c *gin.Context) {
 			Name:     user.Name,
 			Username: user.Username,
 		},
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"code":    http.StatusOK,
+		"data":    resp,
+	})
+}
+
+func (h *AuthHandler) Me(c *gin.Context) {
+	userClaims, ok := middleware.GetUserClaims(c)
+
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"code":    http.StatusUnauthorized,
+			"error":   "Unauthorized",
+		})
+		return
+	}
+
+	userID := userClaims.UserID
+
+	user, err := h.auth.Me(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		logger.Info("failed to get user profile: ", zap.Error(err))
+		return
+	}
+
+	resp := response.UserResponse{
+		ID:       user.ID,
+		Name:     user.Name,
+		Username: user.Username,
 	}
 
 	c.JSON(http.StatusOK, gin.H{
