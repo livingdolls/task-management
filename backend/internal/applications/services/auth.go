@@ -5,7 +5,10 @@ import (
 	"task-management/internal/applications/ports/repository"
 	"task-management/internal/applications/ports/services"
 	"task-management/internal/domain"
+	"task-management/internal/infra/logger"
 	"task-management/internal/utils"
+
+	"go.uber.org/zap"
 )
 
 var (
@@ -32,7 +35,12 @@ func (a *authService) Login(username string, password string) (string, *domain.U
 		return "", nil, err
 	}
 
-	if user == nil || utils.CheckPassword(user.Password, password) != nil {
+	if user == nil {
+		logger.Info("user not found: ", zap.String("username", username))
+		return "", nil, errors.New("user not found")
+	}
+
+	if utils.CheckPassword(user.Password, password) != nil {
 		return "", nil, ErrInvalidPassword
 	}
 

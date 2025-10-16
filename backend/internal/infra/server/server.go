@@ -30,6 +30,20 @@ type AppServer struct {
 func InitServer(cf *config.AppConfig, db *gorm.DB) *AppServer {
 	engine := gin.Default()
 
+	// Enable CORS
+	engine.Use(func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	})
+
 	userRepo := storages.NewUserRepository(db)
 	jwtService := security.NewJWTAdapter(cf.Secret, time.Hour)
 	authService := services.NewAuthService(userRepo, jwtService)

@@ -43,7 +43,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 			})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"code":    http.StatusInternalServerError,
+			"error":   "Internal server error",
+		})
 
 		logger.Info("failed to register user: ", zap.Error(err))
 		return
@@ -85,8 +89,21 @@ func (h *AuthHandler) Login(c *gin.Context) {
 			})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 
+		if err.Error() == "user not found" {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"code":    http.StatusNotFound,
+				"error":   "User not found",
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"code":    http.StatusInternalServerError,
+			"error":   "Internal server error",
+		})
 		logger.Info("failed to login user: ", zap.Error(err))
 		return
 	}
