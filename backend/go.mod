@@ -9,7 +9,11 @@ require (
 	go.uber.org/zap v1.27.0
 )
 
-require filippo.io/edwards25519 v1.1.0 // indirect
+require (
+	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+)
 
 require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
@@ -27,4 +31,6 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
+	gorm.io/driver/mysql v1.6.0
+	gorm.io/gorm v1.31.0
 )
