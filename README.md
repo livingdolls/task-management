@@ -33,6 +33,7 @@ A Task Management application is an application used to organize, monitor, and c
 - React Vite typescript
 - MySql
 - Golang Gin
+- Tailwind Css
 
 ## Database Struktur
 
