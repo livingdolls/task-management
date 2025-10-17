@@ -23,15 +23,30 @@ func NewTaskHandler(taskService services.TaskService) *TaskHandler {
 	return &TaskHandler{taskService: taskService}
 }
 
+// Create creates a new task for the authenticated user
+// @Summary Create a new task
+// @Description Create a new task with the provided details for the authenticated user
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Param task body request.CreateTask true "Task creation request"
+// @Success 201 {object} response.BaseTaskResponse "Task created successfully"
+// @Failure 400 {object} response.ErrorResponse "Bad request - invalid JSON or validation error"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized - invalid or missing token"
+// @Failure 500 {object} response.ErrorResponse "Internal server error"
+// @Security BearerAuth
+// @Router /tasks [post]
 func (h *TaskHandler) Create(c *gin.Context) {
 	var req request.CreateTask
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"code":    http.StatusBadRequest,
-			"error":   err.Error(),
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusBadRequest,
+			Error:   err.Error(),
+		}
+
+		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
 
@@ -39,11 +54,13 @@ func (h *TaskHandler) Create(c *gin.Context) {
 	userClaims, ok := middleware.GetUserClaims(c)
 
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"code":    http.StatusUnauthorized,
-			"error":   "Unauthorized",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusUnauthorized,
+			Error:   "Unauthorized",
+		}
+
+		c.JSON(http.StatusUnauthorized, resp)
 		return
 	}
 
@@ -55,20 +72,21 @@ func (h *TaskHandler) Create(c *gin.Context) {
 	}
 
 	if err := h.taskService.CreateTask(userClaims.UserID, &task); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"code":    http.StatusInternalServerError,
-			"error":   "Internal server error",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusInternalServerError,
+			Error:   "Internal server error",
+		}
 
+		c.JSON(http.StatusInternalServerError, resp)
 		logger.Info("failed to create task: ", zap.Error(err))
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"success": true,
-		"code":    http.StatusCreated,
-		"data": response.Task{
+	resp := response.BaseTaskResponse{
+		Success: true,
+		Code:    http.StatusCreated,
+		Data: response.Task{
 			ID:          task.ID,
 			Title:       task.Title,
 			Description: task.Description,
@@ -76,19 +94,37 @@ func (h *TaskHandler) Create(c *gin.Context) {
 			Deadline:    task.Deadline,
 			CreatedAt:   task.CreatedAt,
 		},
-	})
+	}
+
+	c.JSON(http.StatusCreated, resp)
 }
 
+// Get retrieves tasks for the authenticated user with optional filtering
+// @Summary Get user tasks
+// @Description Retrieves a list of tasks for the authenticated user with optional filtering by status and deadline
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Param status query string false "Filter by task status" Enums(pending, in_progress, completed)
+// @Param deadline query string false "Filter by deadline date (YYYY-MM-DD format)" Format(date)
+// @Success 200 {object} response.ListTaskResponse "Successfully retrieved tasks"
+// @Failure 400 {object} response.ErrorResponse "Invalid deadline format"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized - invalid or missing token"
+// @Failure 500 {object} response.ErrorResponse "Internal server error"
+// @Router /tasks [get]
 func (h *TaskHandler) Get(c *gin.Context) {
 	// claims token dari middleware
 	userClaims, ok := middleware.GetUserClaims(c)
 
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"code":    http.StatusUnauthorized,
-			"error":   "Unauthorized",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusUnauthorized,
+			Error:   "Unauthorized",
+		}
+
+		c.JSON(http.StatusUnauthorized, resp)
 		return
 	}
 
@@ -103,11 +139,13 @@ func (h *TaskHandler) Get(c *gin.Context) {
 	if d := c.Query("deadline"); d != "" {
 		parsedDeadline, err := time.Parse("2006-01-02", d)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"code":    http.StatusBadRequest,
-				"error":   "Invalid deadline format. Use YYYY-MM-DD",
-			})
+			resp := response.ErrorResponse{
+				Success: false,
+				Code:    http.StatusBadRequest,
+				Error:   "Invalid deadline format. Use YYYY-MM-DD.",
+			}
+
+			c.JSON(http.StatusBadRequest, resp)
 			return
 		}
 		deadline = &parsedDeadline
@@ -116,11 +154,13 @@ func (h *TaskHandler) Get(c *gin.Context) {
 	tasks, err := h.taskService.GetTasks(userClaims.UserID, status, deadline)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"code":    http.StatusInternalServerError,
-			"error":   "Internal server error",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusInternalServerError,
+			Error:   "Internal server error",
+		}
+
+		c.JSON(http.StatusInternalServerError, resp)
 
 		logger.Info("failed to get tasks: ", zap.Error(err))
 		return
@@ -139,23 +179,42 @@ func (h *TaskHandler) Get(c *gin.Context) {
 		})
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"code":    http.StatusOK,
-		"data":    resp,
-	})
+	response := response.ListTaskResponse{
+		Success: true,
+		Code:    http.StatusOK,
+		Data:    resp,
+	}
+
+	c.JSON(http.StatusOK, response)
+
 }
 
+// GetByID godoc
+// @Summary Get task by ID
+// @Description Retrieve a specific task by its ID for the authenticated user
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Param id path int true "Task ID"
+// @Security BearerAuth
+// @Success 200 {object} response.BaseTaskResponse "Task retrieved successfully"
+// @Failure 400 {object} response.ErrorResponse "Invalid task ID"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 404 {object} response.ErrorResponse "Task not found"
+// @Failure 500 {object} response.ErrorResponse "Internal server error"
+// @Router /tasks/{id} [get]
 func (h *TaskHandler) GetByID(c *gin.Context) {
 	idParam := c.Param("id")
 
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"code":    http.StatusBadRequest,
-			"error":   "Invalid task ID",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusBadRequest,
+			Error:   "Invalid task ID",
+		}
+
+		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
 
@@ -163,11 +222,13 @@ func (h *TaskHandler) GetByID(c *gin.Context) {
 	userClaims, ok := middleware.GetUserClaims(c)
 
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"code":    http.StatusUnauthorized,
-			"error":   "Unauthorized",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusUnauthorized,
+			Error:   "Unauthorized",
+		}
+
+		c.JSON(http.StatusUnauthorized, resp)
 		return
 	}
 
@@ -175,46 +236,54 @@ func (h *TaskHandler) GetByID(c *gin.Context) {
 
 	if err != nil {
 		if err.Error() == "unauthorized" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"success": false,
-				"code":    http.StatusUnauthorized,
-				"error":   "Unauthorized",
-			})
+			resp := response.ErrorResponse{
+				Success: false,
+				Code:    http.StatusUnauthorized,
+				Error:   "Unauthorized",
+			}
+
+			c.JSON(http.StatusUnauthorized, resp)
 			return
 		}
 
 		if err.Error() == "task not found" {
-			c.JSON(http.StatusNotFound, gin.H{
-				"success": false,
-				"code":    http.StatusNotFound,
-				"error":   "Task not found",
-			})
+			resp := response.ErrorResponse{
+				Success: false,
+				Code:    http.StatusNotFound,
+				Error:   "Task not found",
+			}
+
+			c.JSON(http.StatusNotFound, resp)
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"code":    http.StatusInternalServerError,
-			"error":   "Internal server error",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusInternalServerError,
+			Error:   "Internal server error",
+		}
+
+		c.JSON(http.StatusInternalServerError, resp)
 
 		logger.Info("failed to get task by id: ", zap.Error(err))
 		return
 	}
 
 	if task == nil {
-		c.JSON(http.StatusNotFound, gin.H{
-			"success": false,
-			"code":    http.StatusNotFound,
-			"error":   "Task not found",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusNotFound,
+			Error:   "Task not found",
+		}
+
+		c.JSON(http.StatusNotFound, resp)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"code":    http.StatusOK,
-		"data": response.Task{
+	response := response.BaseTaskResponse{
+		Success: true,
+		Code:    http.StatusOK,
+		Data: response.Task{
 			ID:          task.ID,
 			Title:       task.Title,
 			Description: task.Description,
@@ -222,9 +291,26 @@ func (h *TaskHandler) GetByID(c *gin.Context) {
 			Deadline:    task.Deadline,
 			CreatedAt:   task.CreatedAt,
 		},
-	})
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
+// Update updates an existing task for the authenticated user
+// @Summary Update an existing task
+// @Description Update a task with the provided details for the authenticated user
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Param id path int true "Task ID"
+// @Param task body request.UpdateTask true "Task update request"
+// @Success 200 {object} response.BaseTaskResponse "Task updated successfully"
+// @Failure 400 {object} response.ErrorResponse "Bad request - invalid JSON, validation error, or invalid task ID"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized - invalid or missing token"
+// @Failure 404 {object} response.ErrorResponse "Task not found"
+// @Failure 500 {object} response.ErrorResponse "Internal server error"
+// @Security BearerAuth
+// @Router /tasks/{id} [put]
 func (h *TaskHandler) Update(c *gin.Context) {
 	var req request.UpdateTask
 
@@ -232,11 +318,13 @@ func (h *TaskHandler) Update(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"code":    http.StatusBadRequest,
-			"error":   "Invalid task ID",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusBadRequest,
+			Error:   "Invalid task ID",
+		}
+
+		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
 
@@ -244,20 +332,24 @@ func (h *TaskHandler) Update(c *gin.Context) {
 	userClaims, ok := middleware.GetUserClaims(c)
 
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"code":    http.StatusUnauthorized,
-			"error":   "Unauthorized",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusUnauthorized,
+			Error:   "Unauthorized",
+		}
+
+		c.JSON(http.StatusUnauthorized, resp)
 		return
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"code":    http.StatusBadRequest,
-			"error":   err.Error(),
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusBadRequest,
+			Error:   err.Error(),
+		}
+
+		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
 
@@ -271,37 +363,43 @@ func (h *TaskHandler) Update(c *gin.Context) {
 
 	if err := h.taskService.UpdateTask(&task, userClaims.UserID); err != nil {
 		if err.Error() == "unauthorized" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"success": false,
-				"code":    http.StatusUnauthorized,
-				"error":   "Unauthorized",
-			})
+			resp := response.ErrorResponse{
+				Success: false,
+				Code:    http.StatusUnauthorized,
+				Error:   "Unauthorized",
+			}
+
+			c.JSON(http.StatusUnauthorized, resp)
 			return
 		}
 
 		if err.Error() == "task not found" {
-			c.JSON(http.StatusNotFound, gin.H{
-				"success": false,
-				"code":    http.StatusNotFound,
-				"error":   "Task not found",
-			})
+			resp := response.ErrorResponse{
+				Success: false,
+				Code:    http.StatusNotFound,
+				Error:   "Task not found",
+			}
+
+			c.JSON(http.StatusNotFound, resp)
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"code":    http.StatusInternalServerError,
-			"error":   "Internal server error",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusInternalServerError,
+			Error:   "Internal server error",
+		}
+
+		c.JSON(http.StatusInternalServerError, resp)
 
 		logger.Error("failed to update task: ", zap.Error(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"code":    http.StatusOK,
-		"data": response.Task{
+	resp := response.BaseTaskResponse{
+		Success: true,
+		Code:    http.StatusOK,
+		Data: response.Task{
 			ID:          task.ID,
 			Title:       task.Title,
 			Description: task.Description,
@@ -309,19 +407,37 @@ func (h *TaskHandler) Update(c *gin.Context) {
 			Deadline:    task.Deadline,
 			CreatedAt:   task.CreatedAt,
 		},
-	})
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
+// Delete godoc
+// @Summary Delete a task
+// @Description Delete a task by ID. Only the task owner can delete their own task.
+// @Tags tasks
+// @Accept json
+// @Produce json
+// @Param id path int true "Task ID"
+// @Security BearerAuth
+// @Success 200 {object} response.DeleteResponse "Task deleted successfully"
+// @Failure 400 {object} response.ErrorResponse "Invalid task ID"
+// @Failure 401 {object} response.ErrorResponse "Unauthorized"
+// @Failure 404 {object} response.ErrorResponse "Task not found"
+// @Failure 500 {object} response.ErrorResponse "Internal server error"
+// @Router /tasks/{id} [delete]
 func (h *TaskHandler) Delete(c *gin.Context) {
 	idParam := c.Param("id")
 
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"code":    http.StatusBadRequest,
-			"error":   "Invalid task ID",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusBadRequest,
+			Error:   "Invalid task ID",
+		}
+
+		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
 
@@ -329,48 +445,57 @@ func (h *TaskHandler) Delete(c *gin.Context) {
 	userClaims, ok := middleware.GetUserClaims(c)
 
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"code":    http.StatusUnauthorized,
-			"error":   "Unauthorized",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusUnauthorized,
+			Error:   "Unauthorized",
+		}
+
+		c.JSON(http.StatusUnauthorized, resp)
 		return
 	}
 
 	if err := h.taskService.DeleteTask(uint(id), userClaims.UserID); err != nil {
 		if err.Error() == "unauthorized" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"success": false,
-				"code":    http.StatusUnauthorized,
-				"error":   "Unauthorized",
-			})
+			resp := response.ErrorResponse{
+				Success: false,
+				Code:    http.StatusUnauthorized,
+				Error:   "Unauthorized",
+			}
+
+			c.JSON(http.StatusUnauthorized, resp)
 			return
 		}
 
 		if err.Error() == "task not found" {
-			c.JSON(http.StatusNotFound, gin.H{
-				"success": false,
-				"code":    http.StatusNotFound,
-				"error":   "Task not found",
-			})
+			resp := response.ErrorResponse{
+				Success: false,
+				Code:    http.StatusNotFound,
+				Error:   "Task not found",
+			}
+
+			c.JSON(http.StatusNotFound, resp)
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"code":    http.StatusInternalServerError,
-			"error":   "Internal server error",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusInternalServerError,
+			Error:   "Internal server error",
+		}
+
+		c.JSON(http.StatusInternalServerError, resp)
 
 		logger.Error("failed to delete task: ", zap.Error(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"code":    http.StatusOK,
-		"data":    "Task deleted successfully",
-	})
+	resp := response.DeleteResponse{
+		Success: true,
+		Code:    http.StatusOK,
+		Data:    "Task deleted successfully",
+	}
+	c.JSON(http.StatusOK, resp)
 }
 
 func derefString(s *string) string {

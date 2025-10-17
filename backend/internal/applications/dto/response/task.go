@@ -10,3 +10,21 @@ type Task struct {
 	Deadline    *time.Time `json:"deadline,omitempty"`
 	CreatedAt   time.Time  `json:"created_at"`
 }
+
+type BaseTaskResponse struct {
+	Success bool `json:"success"`
+	Code    int  `json:"code"`
+	Data    Task `json:"data"`
+}
+
+type ListTaskResponse struct {
+	Success bool   `json:"success"`
+	Code    int    `json:"code"`
+	Data    []Task `json:"data"`
+}
+
+type DeleteResponse struct {
+	Success bool   `json:"success"`
+	Code    int    `json:"code"`
+	Data    string `json:"data"`
+}

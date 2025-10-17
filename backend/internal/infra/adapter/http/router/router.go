@@ -6,6 +6,8 @@ import (
 	"task-management/internal/infra/adapter/http/middleware"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, taskHandler *handler.TaskHandler, jwtSvc services.JWTService) {
@@ -35,4 +37,8 @@ func SetupRoutes(r *gin.Engine, authHandler *handler.AuthHandler, taskHandler *h
 			taskGroup.DELETE("/:id", taskHandler.Delete)
 		}
 	}
+
+	// --- Swagger ---
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 }
