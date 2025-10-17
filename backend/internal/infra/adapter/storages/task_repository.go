@@ -47,10 +47,12 @@ func (t *taskRepository) GetByUser(userID uint, status *domain.TaskStatus, deadl
 	}
 
 	if deadline != nil {
-		query = query.Where("deadline <= ?", *deadline)
+		query = query.Where("deadline <= ?", *deadline).Order("deadline ASC")
+	} else {
+		query = query.Order("created_at ASC")
 	}
 
-	err := query.Order("deadline ASC").Find(&tasks).Error
+	err := query.Find(&tasks).Error
 	return tasks, err
 }
 
