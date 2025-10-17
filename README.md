@@ -2,7 +2,13 @@
 
 A Task Management application is an application used to organize, monitor, and complete tasks efficiently.
 
-## Run manual backend and frontend task management
+## using docker composer
+
+- run docker compose compose up --build
+
+## Or Run manual backend and frontend task management
+
+- import dumpdatabase.sql
 
 - rename config.yaml.example to config.yaml on folder backend/config
 - rename .env.local.example to .env.local
@@ -13,13 +19,14 @@ A Task Management application is an application used to organize, monitor, and c
 - setup frontend, on folder frontend, run npm install
 - run frontend, on folder frontend, run npm run dev
 
-## Or run it easier using docker composer
-
-- run docker compose compose up --build
-
 - frontend url http://localhost:5173
 - backend url http://localhost:3000
 - docs swagger url http://localhost:3000/swagger/index.html
+
+## Default Login
+
+- username admin
+- password admin123
 
 ## Technology
 

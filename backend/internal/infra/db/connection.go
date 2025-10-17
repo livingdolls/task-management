@@ -6,6 +6,7 @@ import (
 	"task-management/internal/config"
 	"task-management/internal/domain"
 	"task-management/internal/infra/logger"
+	"task-management/internal/utils"
 	"time"
 
 	"go.uber.org/zap"
@@ -47,6 +48,9 @@ func NewDatabase(cfg config.DatabaseConfig) (*Database, error) {
 		return nil, fmt.Errorf("failed to run auto migration: %w", err)
 	}
 
+	// buat user default jika belum ada
+	createDefaultUser(db)
+
 	sqlDB.SetMaxOpenConns(cfg.MaxOpenCons)
 	sqlDB.SetMaxIdleConns(cfg.MaxIdleCons)
 	sqlDB.SetConnMaxLifetime(time.Duration(cfg.MaxLifeTime) * time.Minute)
@@ -77,4 +81,32 @@ func (d *Database) Close() error {
 	logger.Info("Database connection closed")
 
 	return nil
+}
+
+func createDefaultUser(db *gorm.DB) {
+	const defaultUsername = "admin"
+	const defaultPassword = "admin123"
+
+	var user domain.User
+	result := db.First(&user, "username = ?", defaultUsername)
+
+	if result.Error == gorm.ErrRecordNotFound {
+		hashed, _ := utils.HashPassword(defaultPassword)
+
+		newUser := domain.User{
+			Username: defaultUsername,
+			Password: string(hashed),
+		}
+
+		if err := db.Create(&newUser).Error; err != nil {
+			logger.Info("failed to create default user")
+		} else {
+			logger.Info("Default user created",
+				zap.String("username", defaultUsername),
+				zap.String("password", defaultPassword),
+			)
+		}
+	} else {
+		fmt.Println("Default user already exists")
+	}
 }
