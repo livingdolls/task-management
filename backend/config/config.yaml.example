@@ -1,0 +1,15 @@
+database:
+  driver: "mysql"
+  host: "mysql_db"
+  port: "3306"
+  user: "root"
+  password: "secret"
+  name: "testdb"
+  max_open_cons: 10
+  max_idle_cons: 5
+  max_life_time: 5
+
+server:
+  port: 3000
+
+secret: "yurina_hirate"

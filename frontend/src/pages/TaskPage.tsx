@@ -23,7 +23,7 @@ export const TaskPage = () => {
     deadline: new Date(),
   });
 
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { setUpdateModal } = useUiStore();
   const { setCreateModal } = useCreateTaskStore();
 
@@ -100,6 +100,11 @@ export const TaskPage = () => {
     setCreateModal(true);
   }, [setCreateModal]);
 
+  const handleLogout = useCallback(() => {
+    notifications.logoutSuccess();
+    logout();
+  }, [logout]);
+
   if (isLoading) {
     return (
       <div className="container mx-auto p-4">
@@ -121,9 +126,16 @@ export const TaskPage = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <PageHeader userName={user?.name} onCreateTask={handleOpenCreateModal} />
+      <PageHeader
+        userName={user?.name}
+        onCreateTask={handleOpenCreateModal}
+        onLogout={handleLogout}
+      />
 
-      <TaskFiltersComponent filters={filters} onFiltersChange={handleFiltersChange} />
+      <TaskFiltersComponent
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+      />
 
       <TaskList
         tasks={tasks}

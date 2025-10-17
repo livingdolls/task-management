@@ -21,6 +21,12 @@ export const showNotification = (
 };
 
 export const notifications = {
+  registerSuccess: () =>
+    showNotification(
+      "Registration successful, you will redirect to login page",
+      "success"
+    ),
+  logoutSuccess: () => showNotification("Logged out successfully", "success"),
   taskCreated: () => showNotification("Task created successfully", "success"),
   taskUpdated: () => showNotification("Task updated successfully", "success"),
   taskDeleted: () => showNotification("Task deleted successfully", "success"),

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { RegisterRepository } from "../repository/auth_repository";
+import { notifications } from "../utils/notifications";
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export const RegisterPage = () => {
         );
         return;
       }
+      notifications.registerSuccess();
       navigate("/login");
     },
     onError: (error: any) => {
