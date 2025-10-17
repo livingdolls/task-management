@@ -5,11 +5,17 @@ import (
 	"os"
 	"path/filepath"
 
+	_ "task-management/cmd/api/docs"
 	"task-management/internal/config"
 	"task-management/internal/infra/db"
 	"task-management/internal/infra/server"
 )
 
+// @title Task Management API
+// @version 1.0
+// @description Task Management API
+// @host localhost:3010
+// @BasePath /api/v1
 func main() {
 	configPath, err := filepath.Abs("config")
 

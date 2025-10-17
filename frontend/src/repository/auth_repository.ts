@@ -6,11 +6,6 @@ export const LoginRepository = async (
   arg: TLogin
 ): Promise<TApiResponse<TLoginResponse>> => {
   const rest = await axiosClient.post("/auth/login", arg);
-
-  if (rest.status !== 200 && rest.status !== 201) {
-    throw new Error(rest.data?.errors || "Login failed");
-  }
-
   return rest.data;
 };
 

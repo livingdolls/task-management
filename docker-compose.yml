@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.1
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: testdb
+      MYSQL_ROOT_HOST: "%"
+    ports:
+      - "3306:3306"
+    networks:
+      - appnet
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    container_name: go-backend
+    depends_on:
+      - mysql
+    ports:
+      - "3000:3000"
+    networks:
+      - appnet
+
+  frontend:
+    build: ./frontend
+    container_name: vite-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  mysql_data:

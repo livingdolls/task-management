@@ -20,15 +20,28 @@ func NewAuthHandler(auth services.AuthService) *AuthHandler {
 	return &AuthHandler{auth: auth}
 }
 
+// Register godoc
+// @Summary Register a new user
+// @Description Register a new user with name, username, and password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body request.RegisterUser true "User registration data"
+// @Success 201 {object} response.BaseUserResponse "User registered successfully"
+// @Failure 400 {object} response.ErrorResponse "Bad request - invalid input"
+// @Failure 409 {object} response.ErrorResponse "Conflict - username already exists"
+// @Failure 500 {object} response.ErrorResponse "Internal server error"
+// @Router /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req request.RegisterUser
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"code":    http.StatusBadRequest,
-			"error":   err.Error(),
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusBadRequest,
+			Error:   err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
 
@@ -36,45 +49,62 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	if err != nil {
 		if err.Error() == "username is already exists" {
-			c.JSON(http.StatusConflict, gin.H{
-				"success": false,
-				"code":    http.StatusConflict,
-				"error":   "Username already exists",
-			})
+			resp := response.ErrorResponse{
+				Success: false,
+				Code:    http.StatusConflict,
+				Error:   "Username already exists",
+			}
+			c.JSON(http.StatusConflict, resp)
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"code":    http.StatusInternalServerError,
-			"error":   "Internal server error",
-		})
+
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusInternalServerError,
+			Error:   "Internal server error",
+		}
+		c.JSON(http.StatusInternalServerError, resp)
 
 		logger.Info("failed to register user: ", zap.Error(err))
 		return
 	}
 
-	resp := response.UserResponse{
-		ID:       user.ID,
-		Name:     user.Name,
-		Username: user.Username,
+	resp := response.BaseUserResponse{
+		Success: true,
+		Code:    http.StatusCreated,
+		Data: response.UserResponse{
+			ID:       user.ID,
+			Name:     user.Name,
+			Username: user.Username,
+		},
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"success": true,
-		"code":    http.StatusCreated,
-		"data":    resp,
-	})
+	c.JSON(http.StatusCreated, resp)
 }
 
+// Login godoc
+// @Summary User login
+// @Description Authenticate user with username and password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body request.LoginUser true "Login credentials"
+// @Success 200 {object} response.BaseAuthResponse "success: true, code: 200, data: response.AuthResponse"
+// @Failure 400 {object} response.ErrorResponse "success: false, code: 400, error: validation error"
+// @Failure 401 {object} response.ErrorResponse "success: false, code: 401, error: Invalid username or password"
+// @Failure 404 {object} response.ErrorResponse "success: false, code: 404, error: User not found"
+// @Failure 500 {object} response.ErrorResponse "success: false, code: 500, error: Internal server error"
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req request.LoginUser
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"code":    http.StatusBadRequest,
-			"error":   err.Error(),
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusBadRequest,
+			Error:   err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, resp)
 		return
 	}
 
@@ -82,57 +112,73 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	if err != nil {
 		if err.Error() == "invalid username or password" {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"success": false,
-				"code":    http.StatusUnauthorized,
-				"error":   "Invalid username or password",
-			})
+			resp := response.ErrorResponse{
+				Success: false,
+				Code:    http.StatusUnauthorized,
+				Error:   "Invalid username or password",
+			}
+			c.JSON(http.StatusUnauthorized, resp)
 			return
 		}
 
 		if err.Error() == "user not found" {
-			c.JSON(http.StatusNotFound, gin.H{
-				"success": false,
-				"code":    http.StatusNotFound,
-				"error":   "User not found",
-			})
+			resp := response.ErrorResponse{
+				Success: false,
+				Code:    http.StatusNotFound,
+				Error:   "User not found",
+			}
+			c.JSON(http.StatusNotFound, resp)
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"code":    http.StatusInternalServerError,
-			"error":   "Internal server error",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusInternalServerError,
+			Error:   "Internal server error",
+		}
+
+		c.JSON(http.StatusInternalServerError, resp)
 		logger.Info("failed to login user: ", zap.Error(err))
 		return
 	}
 
-	resp := response.AuthResponse{
-		Token: token,
-		User: &response.UserResponse{
-			ID:       user.ID,
-			Name:     user.Name,
-			Username: user.Username,
+	resp := response.BaseAuthResponse{
+		Success: true,
+		Code:    http.StatusOK,
+		Data: response.AuthResponse{
+			Token: token,
+			User: &response.UserResponse{
+				ID:       user.ID,
+				Name:     user.Name,
+				Username: user.Username,
+			},
 		},
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"code":    http.StatusOK,
-		"data":    resp,
-	})
+	c.JSON(http.StatusOK, resp)
 }
 
+// Me godoc
+// @Summary Get current user profile
+// @Description Get the profile information of the currently authenticated user
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{} "success: true, code: 200, data: UserResponse"
+// @Failure 401 {object} response.ErrorResponse "success: false, code: 401, error: Unauthorized"
+// @Failure 500 {object} response.ErrorResponse "error: Internal server error"
+// @Router /auth/profile [get]
 func (h *AuthHandler) Me(c *gin.Context) {
 	userClaims, ok := middleware.GetUserClaims(c)
 
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"success": false,
-			"code":    http.StatusUnauthorized,
-			"error":   "Unauthorized",
-		})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusUnauthorized,
+			Error:   "Unauthorized",
+		}
+		c.JSON(http.StatusUnauthorized, resp)
 		return
 	}
 
@@ -140,20 +186,26 @@ func (h *AuthHandler) Me(c *gin.Context) {
 
 	user, err := h.auth.Me(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		resp := response.ErrorResponse{
+			Success: false,
+			Code:    http.StatusInternalServerError,
+			Error:   "Internal server error",
+		}
+
 		logger.Info("failed to get user profile: ", zap.Error(err))
+		c.JSON(http.StatusInternalServerError, resp)
 		return
 	}
 
-	resp := response.UserResponse{
-		ID:       user.ID,
-		Name:     user.Name,
-		Username: user.Username,
+	resp := response.BaseUserResponse{
+		Success: true,
+		Code:    http.StatusOK,
+		Data: response.UserResponse{
+			ID:       user.ID,
+			Name:     user.Name,
+			Username: user.Username,
+		},
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"code":    http.StatusOK,
-		"data":    resp,
-	})
+	c.JSON(http.StatusOK, resp)
 }

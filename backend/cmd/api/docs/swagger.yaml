@@ -1,0 +1,461 @@
+basePath: /api/v1
+definitions:
+  domain.TaskStatus:
+    enum:
+    - To Do
+    - In Progress
+    - Done
+    type: string
+    x-enum-varnames:
+    - ToDo
+    - InProgress
+    - Done
+  request.CreateTask:
+    properties:
+      deadline:
+        type: string
+      description:
+        type: string
+      status:
+        allOf:
+        - $ref: '#/definitions/domain.TaskStatus'
+        enum:
+        - To Do
+        - In Progress
+        - Done
+      title:
+        type: string
+    required:
+    - description
+    - status
+    - title
+    type: object
+  request.LoginUser:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  request.RegisterUser:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - name
+    - password
+    - username
+    type: object
+  request.UpdateTask:
+    properties:
+      deadline:
+        type: string
+      description:
+        type: string
+      status:
+        $ref: '#/definitions/domain.TaskStatus'
+      title:
+        type: string
+    type: object
+  response.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/response.UserResponse'
+    type: object
+  response.BaseAuthResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/response.AuthResponse'
+      success:
+        type: boolean
+    type: object
+  response.BaseTaskResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/response.Task'
+      success:
+        type: boolean
+    type: object
+  response.BaseUserResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/response.UserResponse'
+      success:
+        type: boolean
+    type: object
+  response.DeleteResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        type: string
+      success:
+        type: boolean
+    type: object
+  response.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      error:
+        type: string
+      success:
+        type: boolean
+    type: object
+  response.ListTaskResponse:
+    properties:
+      code:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/response.Task'
+        type: array
+      success:
+        type: boolean
+    type: object
+  response.Task:
+    properties:
+      created_at:
+        type: string
+      deadline:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  response.UserResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:3010
+info:
+  contact: {}
+  description: Task Management API
+  title: Task Management API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with username and password
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.LoginUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'success: true, code: 200, data: response.AuthResponse'
+          schema:
+            $ref: '#/definitions/response.BaseAuthResponse'
+        "400":
+          description: 'success: false, code: 400, error: validation error'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: 'success: false, code: 401, error: Invalid username or password'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: 'success: false, code: 404, error: User not found'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: 'success: false, code: 500, error: Internal server error'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: User login
+      tags:
+      - auth
+  /auth/profile:
+    get:
+      consumes:
+      - application/json
+      description: Get the profile information of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'success: true, code: 200, data: UserResponse'
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: 'success: false, code: 401, error: Unauthorized'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: 'error: Internal server error'
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with name, username, and password
+      parameters:
+      - description: User registration data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.RegisterUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/response.BaseUserResponse'
+        "400":
+          description: Bad request - invalid input
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "409":
+          description: Conflict - username already exists
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Register a new user
+      tags:
+      - auth
+  /tasks:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of tasks for the authenticated user with optional
+        filtering by status and deadline
+      parameters:
+      - description: Filter by task status
+        enum:
+        - pending
+        - in_progress
+        - completed
+        in: query
+        name: status
+        type: string
+      - description: Filter by deadline date (YYYY-MM-DD format)
+        format: date
+        in: query
+        name: deadline
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved tasks
+          schema:
+            $ref: '#/definitions/response.ListTaskResponse'
+        "400":
+          description: Invalid deadline format
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user tasks
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: Create a new task with the provided details for the authenticated
+        user
+      parameters:
+      - description: Task creation request
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateTask'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Task created successfully
+          schema:
+            $ref: '#/definitions/response.BaseTaskResponse'
+        "400":
+          description: Bad request - invalid JSON or validation error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new task
+      tags:
+      - tasks
+  /tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a task by ID. Only the task owner can delete their own task.
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task deleted successfully
+          schema:
+            $ref: '#/definitions/response.DeleteResponse'
+        "400":
+          description: Invalid task ID
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Task not found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete a task
+      tags:
+      - tasks
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a specific task by its ID for the authenticated user
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task retrieved successfully
+          schema:
+            $ref: '#/definitions/response.BaseTaskResponse'
+        "400":
+          description: Invalid task ID
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Task not found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get task by ID
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: Update a task with the provided details for the authenticated user
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task update request
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateTask'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Task updated successfully
+          schema:
+            $ref: '#/definitions/response.BaseTaskResponse'
+        "400":
+          description: Bad request - invalid JSON, validation error, or invalid task
+            ID
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized - invalid or missing token
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Task not found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update an existing task
+      tags:
+      - tasks
+swagger: "2.0"

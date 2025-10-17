@@ -25,7 +25,7 @@ export const LoginPage = () => {
       setToken(res.data.token);
     },
     onError: (err: any) => {
-      setError(err.response?.data?.message || "Login failed");
+      setError(err.response?.data?.error || "Login failed");
     },
   });
 

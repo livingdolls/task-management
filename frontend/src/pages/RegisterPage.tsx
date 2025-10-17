@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import { RegisterRepository } from "../repository/auth_repository";
+import { notifications } from "../utils/notifications";
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -17,13 +19,16 @@ export const RegisterPage = () => {
     onSuccess: (res) => {
       if (!res.success || !res.data) {
         alert("Registration failed");
+        setError(
+          typeof res?.errors === "string" ? res.errors : "Register Failed"
+        );
         return;
       }
-      console.log("Registration successful:", res.data);
+      notifications.registerSuccess();
       navigate("/login");
     },
-    onError: (error) => {
-      console.error("Registration error:", error);
+    onError: (error: any) => {
+      setError(error.response?.data?.error || "Register Failed");
     },
   });
 
@@ -95,6 +100,12 @@ export const RegisterPage = () => {
               />
             </div>
           </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative">
+              {error}
+            </div>
+          )}
 
           <div>
             <button

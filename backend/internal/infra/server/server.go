@@ -45,7 +45,7 @@ func InitServer(cf *config.AppConfig, db *gorm.DB) *AppServer {
 	})
 
 	userRepo := storages.NewUserRepository(db)
-	jwtService := security.NewJWTAdapter(cf.Secret, time.Hour)
+	jwtService := security.NewJWTAdapter(cf.Secret, 24*time.Hour)
 	authService := services.NewAuthService(userRepo, jwtService)
 	authHandler := handler.NewAuthHandler(authService)
 	taskRepo := storages.NewTaskRepository(db)
