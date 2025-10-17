@@ -1,0 +1,287 @@
+{
+	"info": {
+		"_postman_id": "f4e34a04-21b5-4d90-9260-4e9eb88cb8ca",
+		"name": "Task Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31674695"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"User\",\n    \"username\" : \"usermanagement\",\n    \"password\" : \"user121212\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/api/v1/auth/register",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\" : \"usermanagement\",\n    \"password\" : \"user121212\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:3000/api/v1/auth/login",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Me",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJ1c2VybmFtZSI6InVzZXJtYW5hZ2VtZW50IiwiaXNzIjoidGFzay1tYW5hZ2VtZW50LXNlcnZpY2VzIiwic3ViIjoidXNlci1hdXRoZW50aWNhdGlvbiIsImV4cCI6MTc2MDc1NzE1OCwiaWF0IjoxNzYwNjcwNzU4fQ.eVLuroDe1QJp5hClWZgBXL9RYDO7uM9qi-uigg3966Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Task",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJ1c2VybmFtZSI6InVzZXJtYW5hZ2VtZW50IiwiaXNzIjoidGFzay1tYW5hZ2VtZW50LXNlcnZpY2VzIiwic3ViIjoidXNlci1hdXRoZW50aWNhdGlvbiIsImV4cCI6MTc2MDc1NzE1OCwiaWF0IjoxNzYwNjcwNzU4fQ.eVLuroDe1QJp5hClWZgBXL9RYDO7uM9qi-uigg3966Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"New Task 3\",\n    \"description\": \"This is a new task 3\",\n    \"status\": \"To Do\",\n    \"deadline\": \"2024-12-31T23:59:59Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/tasks",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJ1c2VybmFtZSI6InVzZXJtYW5hZ2VtZW50IiwiaXNzIjoidGFzay1tYW5hZ2VtZW50LXNlcnZpY2VzIiwic3ViIjoidXNlci1hdXRoZW50aWNhdGlvbiIsImV4cCI6MTc2MDc1NzE1OCwiaWF0IjoxNzYwNjcwNzU4fQ.eVLuroDe1QJp5hClWZgBXL9RYDO7uM9qi-uigg3966Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Task Title\",\n    \"description\": \"Updated description\",\n    \"status\": \"In Progress\",\n    \"deadline\": \"2024-11-30T23:59:59Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/tasks/10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"tasks",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJ1c2VybmFtZSI6InVzZXJtYW5hZ2VtZW50IiwiaXNzIjoidGFzay1tYW5hZ2VtZW50LXNlcnZpY2VzIiwic3ViIjoidXNlci1hdXRoZW50aWNhdGlvbiIsImV4cCI6MTc2MDc1NzE1OCwiaWF0IjoxNzYwNjcwNzU4fQ.eVLuroDe1QJp5hClWZgBXL9RYDO7uM9qi-uigg3966Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/tasks/10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"tasks",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tasks",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJ1c2VybmFtZSI6InVzZXJtYW5hZ2VtZW50IiwiaXNzIjoidGFzay1tYW5hZ2VtZW50LXNlcnZpY2VzIiwic3ViIjoidXNlci1hdXRoZW50aWNhdGlvbiIsImV4cCI6MTc2MDc1NzE1OCwiaWF0IjoxNzYwNjcwNzU4fQ.eVLuroDe1QJp5hClWZgBXL9RYDO7uM9qi-uigg3966Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/tasks",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJ1c2VybmFtZSI6InVzZXJtYW5hZ2VtZW50IiwiaXNzIjoidGFzay1tYW5hZ2VtZW50LXNlcnZpY2VzIiwic3ViIjoidXNlci1hdXRoZW50aWNhdGlvbiIsImV4cCI6MTc2MDc1NzE1OCwiaWF0IjoxNzYwNjcwNzU4fQ.eVLuroDe1QJp5hClWZgBXL9RYDO7uM9qi-uigg3966Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/tasks/7",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"tasks",
+								"7"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

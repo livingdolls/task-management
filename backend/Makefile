@@ -4,7 +4,4 @@ run :
 build :
 	go build cmd/api/runner.go
 
-test :
-	go test -v -cover ./...
-
-.PHONY : run, build, test
+.PHONY : run, build

@@ -1,41 +1,13 @@
 # task-management
 
-## Instalasi prerequisites (Go dan Make)
+## Setup task management app via docker compose
 
-- Go 1.22 atau lebih baru
-- Env Config
-- Make build tool
+- rename config.yaml.example to config.yaml on folder backend/config
+- rename .env.local.example to .env.local
+- run docker compose compose up --build
 
-## Setup Config
+## Info
 
-Rename config.yaml.example to config.yaml
-
-# Ubuntu/Debian
-
-sudo apt install make
-
-# CentOS/RHEL
-
-sudo yum install make
-
-# Fedora
-
-sudo dnf install make
-
-# Arch Linux
-
-sudo pacman -S make
-
-## Menjalankan Program
-
-# Menjalankan API Server (Development Mode)
-
-make run
-
-# Build Binary Executable
-
-make build
-
-# Menjalankan Tests
-
-make test
+- frontend url http://localhost:5173
+- backend url http://localhost:3000
+- docs swagger url http://localhost:3000/swagger/index.html

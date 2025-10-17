@@ -8,34 +8,11 @@
 
 ## Setup Config
 
-Rename config.yaml.example to config.yaml
+- install all depedenency, run go mod tidy
+- on folder config, rename config.yaml.example to config.yaml
+- run go run cmd/http/runner.go
+- or if there is already a makefile, run make run
 
-# Ubuntu/Debian
+## Swagger Url
 
-sudo apt install make
-
-# CentOS/RHEL
-
-sudo yum install make
-
-# Fedora
-
-sudo dnf install make
-
-# Arch Linux
-
-sudo pacman -S make
-
-## Menjalankan Program
-
-# Menjalankan API Server (Development Mode)
-
-make run
-
-# Build Binary Executable
-
-make build
-
-# Menjalankan Tests
-
-make test
+- http://localhost:3000/swagger/index.html
